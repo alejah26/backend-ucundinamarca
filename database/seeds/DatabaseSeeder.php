@@ -11,12 +11,5 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call(ConfListSeeder::class);
-        $this->call(ConfListDetailSeeder::class);
-       /* $this->call(InternationalCountrySeeder::class); //CSV
-        $this->call(InternationalLanguageSeeder::class);
-        $this->call(InternationalRegionSeeder::class);
-        $this->call(InternationalMunicipalitySeeder::class); //CSV
-        $this->call(InternationalCurrencyCountrySeeder::class);*/
     }
 }
