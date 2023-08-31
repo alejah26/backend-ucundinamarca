@@ -8,5 +8,5 @@ Route::group([
     'prefix' => 'secure'
 ], function () {
 
-    Route::get('secure', 'SecureController@getSecure');
+    Route::get('get', 'SecureController@getSecure');
 });

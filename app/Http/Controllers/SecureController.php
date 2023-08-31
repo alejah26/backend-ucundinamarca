@@ -16,9 +16,11 @@ class SecureController extends Controller
      */
     public function getSecure(Request $request)
     {
+        $url = $request->url;
+
         try {
 
-            $message = 'Certificado cargado con éxito';
+            $message = 'Certificado cargado con éxito ' . $url;
         } catch (\Exception $e) {
             $message = $e->getMessage();
         }
