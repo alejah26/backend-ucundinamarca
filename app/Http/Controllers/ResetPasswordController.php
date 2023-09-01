@@ -33,7 +33,6 @@ class ResetPasswordController extends Controller
         $this->send($requestData['email']);
 
         return $this->successResponse();
-
     }
 
     /**
@@ -54,7 +53,7 @@ class ResetPasswordController extends Controller
      */
     private function getPasswordReset($request)
     {
-        return DB::table('password_resets')->where(['email'=> $request->email, 'token' => $request->reset_token]);
+        return DB::table('password_resets')->where(['email' => $request->email, 'token' => $request->reset_token]);
     }
 
     private function tokenNotFound()
@@ -72,7 +71,7 @@ class ResetPasswordController extends Controller
     {
         $user = User::whereEmail($request->email)->first();
 
-        $user->update(['password'=> $request->password]);
+        $user->update(['password' => $request->password]);
 
         $this->getPasswordReset($request)->delete();
 
@@ -100,7 +99,7 @@ class ResetPasswordController extends Controller
 
         $oldToken = DB::table('password_resets')->where('email', $email)->first();
 
-        if($oldToken){
+        if ($oldToken) {
             return $oldToken->token;
         }
 
@@ -116,7 +115,8 @@ class ResetPasswordController extends Controller
      * @param $email
      * @return void
      */
-    public function saveToken($token, $email){
+    public function saveToken($token, $email)
+    {
         DB::table('password_resets')->insert([
             'email' => $email,
             'token' => $token,
