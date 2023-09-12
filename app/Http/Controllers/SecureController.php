@@ -28,6 +28,7 @@ class SecureController extends Controller
             $certificado = SslCertificate::createForHostName($url, 10, false);
 
             $orignalParse = parse_url($url, PHP_URL_HOST);
+            $protocolo = parse_url($url)['scheme'];
 
             $get = stream_context_create([
                 "ssl" => [
@@ -46,31 +47,30 @@ class SecureController extends Controller
             );
 
             $cert = stream_context_get_params($read);
-
             $certInfo = openssl_x509_parse($cert['options']['ssl']['peer_certificate']);
 
             //---------------saber si tiene nombre del certificado
             $namepart = explode('CN=', $certInfo['name']);
+            $certDomain = null;
 
             if (count($namepart) == 2) {
                 $certDomain = trim($namepart[1], '*. ');
                 $checkDomain = substr($url, -strlen($certDomain));
-                $tieneSSL = ($certDomain == $checkDomain);
+                $tieneSSL = ($certDomain == $checkDomain && $protocolo == 'https');
             }
             //----------------------------------------
 
             openssl_x509_export($cert["options"]["ssl"]["peer_certificate"], $certInfo);
 
             $csr = $x509->loadX509($certInfo);
-
             $info = $x509->getIssuerDN(X509::DN_OPENSSL);
 
             $data = [
-                'sitio-web'          => $x509->getDNProp('CN')[0],
-                'nombre-en-certificado' => $certInfo['name'] ?? 'No es igual la URL que el nombre en certificado',
-                //'tiene-ssl'         => $tieneSSL,
+                'url'          => $url,
+                'nombre-en-certificado' => $x509->getDNProp('CN')[0] ?? 'No es igual la URL que el nombre en certificado',
+                'tiene-ssl'         => $tieneSSL,
                 'certificado-valido' => $certificado->isValid(),
-                'comprobar-url' => $x509->validateURL($url),
+                'url-valida' => $x509->validateURL($url),
                 'firma-algoritmo' => $csr['signatureAlgorithm']['algorithm'] ?? null,
                 'pais-c' => $info['C'],
                 'organizacion-o' => $info['O'],
