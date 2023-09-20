@@ -21,7 +21,7 @@ class SecureController extends Controller
         $url = $request->url;
         $tieneSSL = false;
         $error = false;
-        $data = [];
+        $data = null;
 
         try {
             $x509 = new X509();
@@ -56,7 +56,7 @@ class SecureController extends Controller
             if (count($namepart) == 2) {
                 $certDomain = trim($namepart[1], '*. ');
                 $checkDomain = substr($url, -strlen($certDomain));
-                $tieneSSL = ($certDomain == $checkDomain && $protocolo == 'https');
+                $tieneSSL = ($certDomain == $checkDomain) || $protocolo == 'https';
             }
             //----------------------------------------
 
@@ -67,17 +67,17 @@ class SecureController extends Controller
 
             $data = [
                 'url'          => $url,
-                'nombre-en-certificado' => $x509->getDNProp('CN')[0] ?? 'No es igual la URL que el nombre en certificado',
-                'tiene-ssl'         => $tieneSSL,
-                'certificado-valido' => $certificado->isValid(),
-                'url-valida' => $x509->validateURL($url),
-                'firma-algoritmo' => $csr['signatureAlgorithm']['algorithm'] ?? null,
-                'pais-c' => $info['C'],
-                'organizacion-o' => $info['O'],
-                'nombre-comun-cn' => $info['CN'],
+                'nombre_en_certificado' => $x509->getDNProp('CN')[0] ?? 'No es igual la URL que el nombre en certificado',
+                'tiene_ssl'         => $tieneSSL,
+                'certificado_valido' => $certificado->isValid(),
+                'url_valida' => $x509->validateURL($url),
+                'firma_algoritmo' => $csr['signatureAlgorithm']['algorithm'] ?? null,
+                'pais_c' => $info['C'],
+                'organizacion_o' => $info['O'],
+                'nombre_comun_cn' => $info['CN'],
                 'valido_desde' => $certificado->validFromDate()->format('Y-M-d') ?? null,
                 'valido_hasta' => $certificado->expirationDate()->format('Y-M-d') ?? null,
-                'dias-expira' => $certificado->expirationDate()->diffInDays() ?? null
+                'dias_expira' => $certificado->expirationDate()->diffInDays() ?? -1
             ];
 
             $message = 'Sitio verificado con éxito.';
