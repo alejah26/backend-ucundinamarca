@@ -22,6 +22,7 @@ class SecureController extends Controller
         $tieneSSL = false;
         $error = false;
         $data = null;
+        $tipoCertificado = [];
 
         try {
             $x509 = new X509();
@@ -64,6 +65,9 @@ class SecureController extends Controller
 
             $csr = $x509->loadX509($certInfo);
             $info = $x509->getIssuerDN(X509::DN_OPENSSL);
+            $seccionesCN = explode(" ", $info['CN']);
+            // dd($seccionesCN);
+            //  $existeTipoCertificado =
 
             $data = [
                 'url'          => $url,
