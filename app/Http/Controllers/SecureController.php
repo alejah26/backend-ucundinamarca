@@ -22,7 +22,7 @@ class SecureController extends Controller
         $tieneSSL = false;
         $error = false;
         $data = null;
-        $tipoCertificado = [];
+        $tiposCertificados = ['DV', 'OV', 'EV'];
 
         try {
             $x509 = new X509();
@@ -66,13 +66,17 @@ class SecureController extends Controller
             $csr = $x509->loadX509($certInfo);
             $info = $x509->getIssuerDN(X509::DN_OPENSSL);
             $seccionesCN = explode(" ", $info['CN']);
-            // dd($seccionesCN);
-            //  $existeTipoCertificado =
+
+            $existeTipoCertificado = array_values(array_intersect($tiposCertificados, $seccionesCN));
+
+            $tipoCertificadoEncontrado = count($existeTipoCertificado) ? $existeTipoCertificado[0] : null;
 
             $data = [
                 'url'          => $url,
                 'nombre_en_certificado' => $x509->getDNProp('CN')[0] ?? 'No es igual la URL que el nombre en certificado',
                 'tiene_ssl'         => $tieneSSL,
+                'tipo_certificado'  => $tipoCertificadoEncontrado,
+                'diagnostico_certificado' => $this->diagnosticoTipoCertificado($tipoCertificadoEncontrado),
                 'certificado_valido' => $certificado->isValid(),
                 'url_valida' => $x509->validateURL($url),
                 'firma_algoritmo' => $csr['signatureAlgorithm']['algorithm'] ?? null,
@@ -95,5 +99,27 @@ class SecureController extends Controller
             'error' => $error,
             'data' => $data
         ], Response::HTTP_OK);
+    }
+
+    /**
+     * Diagnóstico del tipo de certificado , para saber si es DV, OV, EV
+     * DV (SSL con validación de dominio)
+     * OV (SSL con validación de empresa)
+     * EV (EV con validación extendida)
+     * @return string
+     */
+    private function diagnosticoTipoCertificado($tipoCertificado)
+    {
+        $mensaje = 'Aunque el sitio es confiable, al no identificarse el tipo de certificado, se debe tener precaución.';
+
+        if ($tipoCertificado === 'DV') {
+            $mensaje = "Se cuenta con un tipo de certificado básico, pero se debe tener precaución al realizar transacciones en el sitio.";
+        } elseif ($tipoCertificado === 'OV') {
+            $mensaje = "Se cuenta con un tipo de certificado aceptable, se puede realizar cualquier transacción con riesgo mínimo.";
+        } elseif ($tipoCertificado === 'EV') {
+            $mensaje = "Se cuenta con un tipo de certificado confiable, se puede realizar transacciones con tranquilidad.";
+        }
+
+        return $mensaje;
     }
 }
